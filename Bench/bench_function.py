@@ -95,7 +95,7 @@ def extract_choice_answer(model_output, question_type, answer_lenth=None):
 def choice_test(**kwargs):
     """
     
-    Get answers of the Choice Questions
+    获取选择题的答案
     
     """
 
@@ -154,7 +154,7 @@ def choice_test(**kwargs):
 def subjective_test(**kwargs):
     """
     
-    Get answers of the Subjective Questions
+    获取主观题的答案
 
     """
 
@@ -209,10 +209,11 @@ def subjective_test(**kwargs):
 
 def extract_correction_answer(model_output):
     """
-    Extract correction answer from model_output
+    从模型输出中提取纠错答案
 
-    Format of model_output that is expected:
+    预期的模型输出格式:
     "【答案】把is改成are， 删去they ... <eoa>" or "【答案】把is改成are， 删去they ... "
+
     """
     model_answer = []
         
@@ -236,7 +237,7 @@ def extract_correction_answer(model_output):
 def correction_test(**kwargs):
     """
 
-    Get answers of the Correction Questions
+    获取纠错问题的答案
 
     """
 
@@ -317,16 +318,15 @@ def subjective_grade(
         marking_criterion_directory: None
         ):
     """
-    
-    Use teacher model to grade the subjective questions
 
-    :param teacher_model_api: API of the teacher model
-    :param teacher_model_name: Name of the teacher model
-    :param keyword: Keyword used to identify the JSON file
-    :param zero_shot_prompt_text: Prompt text for zero-shot learning
-    :param teacher_prompt_template: Template for the prompt text of the teacher model
-    :param result_directory: Directory containing the JSON file
-    
+    使用教师模型对主观题进行评分。
+
+    :param teacher_model_api: 教师模型的API
+    :param teacher_model_name: 教师模型的名称
+    :param keyword: 用于识别JSON文件的关键词
+    :param zero_shot_prompt_text: 用于零样本学习的提示文本
+    :param teacher_prompt_template: 教师模型提示文本的模板
+    :param result_directory: 包含JSON文件的目
     """
 
     files = [file for file in os.listdir(result_directory) if file.endswith('.json') and keyword in file]
