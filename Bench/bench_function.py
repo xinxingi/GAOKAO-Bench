@@ -503,25 +503,27 @@ def export_distribute_json(
 
     """
     # 查找具有指定关键字的 JSON 文件
-    for root, _, files in os.walk(directory):
-        for file in files:
-            if file == f'{keyword}.json':
-                filepath = os.path.join(root, file)
-                with codecs.open(filepath, 'r', 'utf-8') as f:
-                    data = json.load(f)
+    for root, _, files in os.walk(directory): # 递归遍历目录
+        for file in files: # 遍历目录中的文件
+            if file == f'{keyword}.json': # 如果文件名包含指定关键字
+                filepath = os.path.join(root, file) # 获取文件路径
+                with codecs.open(filepath, 'r', 'utf-8') as f: # 打开文件
+                    data = json.load(f) # 加载 JSON 数据
     
-    example_num = len(data['example'])
+    example_num = len(data['example']) # 获取示例数量
         
     # 准备用于并行处理的关键字参数列表
     kwargs_list = []
-    batch_size = example_num // parallel_num + 1
+    batch_size = example_num // parallel_num + 1 # 计算每个进程处理的示例数量
+    # 创建保存目录
     save_directory = os.path.join(directory, f'{model_name}_{keyword}')
-    os.system(f'mkdir {save_directory}')
-        
-    for idx in range(parallel_num):
-        start_num = idx * batch_size
-        end_num = min(start_num + batch_size, example_num)
-        if start_num >= example_num:
+    os.makedirs(save_directory, exist_ok=True)
+
+    # 生成关键字参数列表
+    for idx in range(parallel_num): # 遍历并行进程
+        start_num = idx * batch_size # 计算开始编号
+        end_num = min(start_num + batch_size, example_num) # 计算结束编号
+        if start_num >= example_num: # 如果开始编号超过示例数量
             break
 
         kwargs = {
@@ -535,7 +537,7 @@ def export_distribute_json(
             'question_type': question_type, 
             'save_directory': save_directory
         }
-        kwargs_list.append(kwargs)
+        kwargs_list.append(kwargs) # 添加关键字参数到列表
     
     # 根据问题类型运行并行处理
     if question_type in ["single_choice", "five_out_of_seven", "multi_question_choice", "multi_choice"]:
