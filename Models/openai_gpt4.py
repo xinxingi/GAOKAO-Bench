@@ -1,29 +1,31 @@
-import requests
 import time
-import openai
 from random import choice
 from typing import List
 
 from openai import OpenAI
 
+import os
+
+from dotenv import load_dotenv
+
+# 加载.env文件中的环境变量
+load_dotenv()
+
+
 
 class  OpenaiAPI:
     def __init__(self, api_key_list:List[str], base_url: str="https://api.openai.com/v1", organization: str=None, model_name:str="gpt-4-0613", temperature:float=0.3, max_tokens: int=4096):
-    
+
         self.api_key_list = api_key_list
         self.base_url = base_url
         self.organization = organization
         self.model_name = model_name
         self.temperature = temperature
         self.max_tokens = max_tokens
-        
-        
-    
     def send_request(self, prompt, question):
         """
         """
         zero_shot_prompt_message = {'role': 'system', 'content': prompt}
-            
         messages = [zero_shot_prompt_message]
         message = {"role":"user", "content":question}
         messages.append(message)
@@ -32,7 +34,6 @@ class  OpenaiAPI:
         while True:
             try:
                 api_key = choice(self.api_key_list)
-                
                 client = OpenAI(api_key=api_key, base_url=self.base_url)
                 output = client.chat.completions.create(
                     model=self.model_name,
@@ -55,7 +56,7 @@ class  OpenaiAPI:
         model_output = self.postprocess(output)
 
         return model_output
-    
+
     def postprocess(self, output):
         """
         """
@@ -79,8 +80,7 @@ def test(model, prompt:str, question:str):
 
 if __name__ == "__main__":
 
-    api_key_list = ['Input Your OpenAI API Key']
-    model_api = OpenaiAPI(api_key_list, model_name="gpt-4")
+    model_api = OpenaiAPI(api_key_list=[os.getenv("openai_api_key")], model_name=os.getenv("model_name"), base_url=os.getenv("base_url"))
     data_example = {
             "year": "2010",
             "category": "（新课标Ⅰ）",
@@ -98,4 +98,3 @@ if __name__ == "__main__":
     result = test(model_api, choice_prompt, choice_question)
 
     print("Model output:\n" + result)
-    
