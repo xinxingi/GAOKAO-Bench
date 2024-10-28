@@ -1,40 +1,43 @@
 import sys
 import os
-import codecs
-import argparse
 
+# 将父目录添加到 sys.path
 parent_path = os.path.dirname(sys.path[0])
+# 如果父目录不在 sys.path 里则添加
 if parent_path not in sys.path:
     sys.path.append(parent_path)
 
-
+# 导入模型模块
 from Models.openai_gpt4 import OpenaiAPI
 
-
-from bench_function import get_api_key, export_distribute_json, export_union_json
+from bench_function import export_distribute_json, export_union_json
 import os
 import json
-import time
 
 
+from dotenv import load_dotenv
+# 加载.env文件中的环境变量
+load_dotenv()
+
+
+
+# 生成模型基准测试的json文件的主要功能
 if __name__ == "__main__":
-    # Load the MCQ_prompt.json file
-    with open("Obj_Prompt.json", "r") as f:
+    # 读取Obj_Prompt.json 文件
+    with open("Obj_Prompt.json", "r", encoding='utf-8') as f:
         data = json.load(f)['examples']
     f.close()
 
-    ### An example of using OpenAI GPT-4 model to generate the json file for the benchmarking of the model
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--openai_api_key', type=str)
-    args = parser.parse_args()
 
-    openai_api_key = args.openai_api_key
-    model_name = "gpt-4"
-    model_api = OpenaiAPI([openai_api_key], model_name=model_name)
-        
+    openai_api_key = os.getenv("openai_api_key")
+    base_url = os.getenv("base_url")
+    model_name = os.getenv("model_name")
+
+    model_api = OpenaiAPI([openai_api_key], base_url=base_url,  model_name=model_name)
+
+    # 循环遍历data中的每一个元素
     for i in range(len(data)):
         directory = "../Data/Objective_Questions"
-
 
         keyword = data[i]['keyword']
         question_type = data[i]['type']
@@ -44,22 +47,20 @@ if __name__ == "__main__":
         print(question_type)
 
         export_distribute_json(
-            model_api, 
-            model_name, 
-            directory, 
-            keyword, 
-            zero_shot_prompt_text, 
-            question_type, 
-            parallel_num=1, 
+            model_api,
+            model_name,
+            directory,
+            keyword,
+            zero_shot_prompt_text,
+            question_type,
+            parallel_num=1,
         )
 
+
         export_union_json(
-            directory, 
-            model_name, 
+            directory,
+            model_name,
             keyword,
             zero_shot_prompt_text,
             question_type
         )
-        
-
-

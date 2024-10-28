@@ -445,13 +445,13 @@ def subjective_grade(
 
 def export_union_json(directory: str, model_name: str, keyword: str, zero_shot_prompt_text: str or List[str], question_type: str) -> None:
     """
-    Merges JSON files containing processed examples in a directory into a single JSON file.
+    合并目录中包含处理示例的 JSON 文件到一个单一的 JSON 文件中。
 
-    :param directory: Directory containing the JSON files
-    :param model_name: Name of the model used to process the examples
-    :param keyword: Keyword used to identify the JSON files
-    :param zero_shot_prompt_text: Prompt text for zero-shot learning
-    :param question_type: Type of questions in the JSON files (e.g. single_choice, five_out_of_seven, etc.)
+    :param directory: 包含 JSON 文件的目录
+    :param model_name: 用于处理示例的模型名称
+    :param keyword: 用于标识 JSON 文件的关键字
+    :param zero_shot_prompt_text: 零样本学习的提示文本
+    :param question_type: JSON 文件中的问题类型（例如：single_choice, five_out_of_seven 等）
     """
     
     save_directory = os.path.join(directory, f'{model_name}_{keyword}')
@@ -493,17 +493,16 @@ def export_distribute_json(
         parallel_num: int = 5
     ) -> None:
     """
-    Distributes the task of processing examples in a JSON file across multiple processes.
+    将处理 JSON 文件中示例的任务分配到多个进程。
+    :param model_name: 使用的模型名称
+    :param directory: 包含 JSON 文件的目录
+    :param keyword: 用于标识 JSON 文件的关键字
+    :param zero_shot_prompt_text: 零样本学习的提示文本
+    :param question_type: JSON 文件中的问题类型（例如：single_choice, five_out_of_seven 等）
+    :param parallel_num: 使用的并行进程数（默认：5）
 
-    :param model_name: Name of the model to use
-    :param directory: Directory containing the JSON file
-    :param keyword: Keyword used to identify the JSON file
-    :param zero_shot_prompt_text: Prompt text for zero-shot learning
-    :param question_type: Type of questions in the JSON file (e.g. single_choice, five_out_of_seven, etc.)
-    :param parallel_num: Number of parallel processes to use (default: 5)
-    
     """
-    # Find the JSON file with the specified keyword
+    # 查找具有指定关键字的 JSON 文件
     for root, _, files in os.walk(directory):
         for file in files:
             if file == f'{keyword}.json':
@@ -513,7 +512,7 @@ def export_distribute_json(
     
     example_num = len(data['example'])
         
-    # Prepare the list of keyword arguments for parallel processing
+    # 准备用于并行处理的关键字参数列表
     kwargs_list = []
     batch_size = example_num // parallel_num + 1
     save_directory = os.path.join(directory, f'{model_name}_{keyword}')
@@ -538,7 +537,7 @@ def export_distribute_json(
         }
         kwargs_list.append(kwargs)
     
-    # Run parallel processing based on the question type
+    # 根据问题类型运行并行处理
     if question_type in ["single_choice", "five_out_of_seven", "multi_question_choice", "multi_choice"]:
         # Parallel(n_jobs=parallel_num)(delayed(choice_test)(**kwargs) for kwargs in kwargs_list)
         for kwargs in kwargs_list:
