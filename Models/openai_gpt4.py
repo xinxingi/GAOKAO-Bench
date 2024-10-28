@@ -30,6 +30,9 @@ class  OpenaiAPI:
         message = {"role":"user", "content":question}
         messages.append(message)
 
+        # 打印请求的消息
+        print(f"System content: {messages[0]['content']}\nUser content: {messages[1]['content']}")
+
         output = {}
         while True:
             try:
