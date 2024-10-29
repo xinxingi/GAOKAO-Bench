@@ -122,7 +122,9 @@ def choice_test(**kwargs):
         answer_lenth = len(standard_answer)
         analysis = data[i]['analysis']
 
+        # 从模型获取答案
         model_output = model_api(prompt, question)
+        # 提取答案
         model_answer = extract_choice_answer(model_output, question_type, answer_lenth)
         # TODO: which content of temp we expect
 
