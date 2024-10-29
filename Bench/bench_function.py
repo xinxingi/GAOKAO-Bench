@@ -476,7 +476,7 @@ def export_union_json(directory: str, model_name: str, keyword: str, zero_shot_p
         
         # Iterate through the JSON files with the specified keyword in the directory
         
-        print("Start to merge json files")
+        logger.info("开始合并 JSON 文件")
         files = [file for file in os.listdir(save_directory) if file.endswith('.json') and keyword in file]
         for file in files:
             file_path = os.path.join(save_directory, file)
@@ -491,6 +491,8 @@ def export_union_json(directory: str, model_name: str, keyword: str, zero_shot_p
         output['example'] = sorted(output['example'], key=lambda x: x['index'])
         with codecs.open(merge_file, 'w', 'utf-8') as f:
             json.dump(output, f, ensure_ascii=False, indent=4)
+
+        logger.info(f"合并后的文件已保存到：{merge_file}")
 
 
 
@@ -513,7 +515,7 @@ def export_distribute_json(
     :param parallel_num: 使用的并行进程数（默认：5）
 
     """
-    logger.debug("函数 export_distribute_json 调用开始")
+    logger.debug("函数 export_distribute_json 调用开始,开始获取模型回答")
     file_found = False
 
     # 查找具有指定关键字的 JSON 文件
@@ -586,4 +588,5 @@ def export_distribute_json(
             for kwargs in kwargs_list:
                 logger.info(f"执行 correction_test，参数：{kwargs}")
                 correction_test(**kwargs)
-    
+
+    logger.debug("函数 export_distribute_json 调用结束,模型回答已获取")

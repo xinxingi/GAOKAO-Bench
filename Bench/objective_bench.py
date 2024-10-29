@@ -58,7 +58,6 @@ if __name__ == "__main__":
             question_type,
             parallel_num=1,
         )
-        logger.info(f"模型调用完成，开始合并数据...")
 
         export_union_json(
             directory,
@@ -67,4 +66,3 @@ if __name__ == "__main__":
             zero_shot_prompt_text,
             question_type
         )
-        logger.info(f"数据合并完成！")
