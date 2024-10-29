@@ -6,10 +6,16 @@ import re
 from random import choice
 import requests
 from typing import List, Union, Dict
-# from joblib import Parallel, delayed
+from joblib import Parallel, delayed
+
 import codecs
 
-from tqdm import  tqdm
+from tqdm import tqdm
+
+import logging
+# 设置日志配置，确保支持中文输出
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
+logger = logging.getLogger()
 
 
 
@@ -124,8 +130,11 @@ def choice_test(**kwargs):
 
         # 从模型获取答案
         model_output = model_api(prompt, question)
+        logger.debug(f"模型输出：{model_output}")
         # 提取答案
         model_answer = extract_choice_answer(model_output, question_type, answer_lenth)
+        logger.debug(f"模型答案：{model_answer}")
+
         # TODO: which content of temp we expect
 
         dict = {
@@ -504,20 +513,33 @@ def export_distribute_json(
     :param parallel_num: 使用的并行进程数（默认：5）
 
     """
+    logger.info("函数 export_distribute_json 调用开始")
+    file_found = False
+
     # 查找具有指定关键字的 JSON 文件
-    for root, _, files in os.walk(directory): # 递归遍历目录
-        for file in files: # 遍历目录中的文件
-            if file == f'{keyword}.json': # 如果文件名包含指定关键字
-                filepath = os.path.join(root, file) # 获取文件路径
-                with codecs.open(filepath, 'r', 'utf-8') as f: # 打开文件
-                    data = json.load(f) # 加载 JSON 数据
-    
+    for root, _, files in os.walk(directory):  # 递归遍历目录
+        for file in files:  # 遍历目录中的文件
+            if file == f'{keyword}.json':  # 如果文件名包含指定关键字
+                filepath = os.path.join(root, file)  # 获取文件路径
+                with codecs.open(filepath, 'r', 'utf-8') as f:  # 打开文件
+                    data = json.load(f)  # 加载 JSON 数据
+                file_found = True
+                break
+        if file_found:
+            break
+
+    if not file_found:
+        logger.warning(f"未找到关键词为 {keyword} 的 JSON 文件")
+        return
+
     example_num = len(data['example']) # 获取示例数量
+    logger.info(f"找到 {example_num} 个示例，关键词：{keyword}")
         
     # 准备用于并行处理的关键字参数列表
     kwargs_list = []
     batch_size = example_num // parallel_num + 1 # 计算每个进程处理的示例数量
     # 创建保存目录
+    logger.info(f"创建保存目录：{model_name}_{keyword}")
     save_directory = os.path.join(directory, f'{model_name}_{keyword}')
     os.makedirs(save_directory, exist_ok=True)
 
@@ -528,6 +550,7 @@ def export_distribute_json(
         if start_num >= example_num: # 如果开始编号超过示例数量
             break
 
+        logger.info(f"处理批次 {idx + 1}/{parallel_num}，范围：{start_num} 到 {end_num}")
         kwargs = {
             'model_api': model_api,
             'start_num': start_num, 
@@ -540,19 +563,27 @@ def export_distribute_json(
             'save_directory': save_directory
         }
         kwargs_list.append(kwargs) # 添加关键字参数到列表
-    
+
     # 根据问题类型运行并行处理
     if question_type in ["single_choice", "five_out_of_seven", "multi_question_choice", "multi_choice"]:
-        # Parallel(n_jobs=parallel_num)(delayed(choice_test)(**kwargs) for kwargs in kwargs_list)
-        for kwargs in kwargs_list:
-            choice_test(**kwargs)
-
+        if os.getenv("parallel_switch") == "on":
+            Parallel(n_jobs=parallel_num)(delayed(choice_test)(**kwargs) for kwargs in kwargs_list)
+        else:
+            for kwargs in kwargs_list:
+                logger.info(f"执行 choice_test，参数：{kwargs}")
+                choice_test(**kwargs)
     elif question_type in ["subjective", "cloze"]:
-        # Parallel(n_jobs=parallel_num)(delayed(subjective_test)(**kwargs) for kwargs in kwargs_list)
-        for kwargs in kwargs_list:
-            subjective_test(**kwargs)
+        if os.getenv("parallel_switch") == "on":
+            Parallel(n_jobs=parallel_num)(delayed(subjective_test)(**kwargs) for kwargs in kwargs_list)
+        else:
+            for kwargs in kwargs_list:
+                logger.info(f"执行 subjective_test，参数：{kwargs}")
+                subjective_test(**kwargs)
     elif question_type == 'correction':
-        # Parallel(n_jobs=parallel_num)(delayed(correction_test)(**kwargs) for kwargs in kwargs_list)
-        for kwargs in kwargs_list:
-            correction_test(**kwargs)
+        if os.getenv("parallel_switch") == "on":
+            Parallel(n_jobs=parallel_num)(delayed(correction_test)(**kwargs) for kwargs in kwargs_list)
+        else:
+            for kwargs in kwargs_list:
+                logger.info(f"执行 correction_test，参数：{kwargs}")
+                correction_test(**kwargs)
     

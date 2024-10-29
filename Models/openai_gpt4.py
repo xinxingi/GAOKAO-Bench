@@ -11,6 +11,11 @@ from dotenv import load_dotenv
 # 加载.env文件中的环境变量
 load_dotenv()
 
+import logging
+# 设置日志配置，确保支持中文输出
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
+logger = logging.getLogger()
+
 
 
 class  OpenaiAPI:
@@ -31,7 +36,7 @@ class  OpenaiAPI:
         messages.append(message)
 
         # 打印请求的消息
-        print(f"System content: {messages[0]['content']}\nUser content: {messages[1]['content']}")
+        logger.debug(f"System content: {messages[0]['content']}\nUser content: {messages[1]['content']}")
 
         output = {}
         while True:

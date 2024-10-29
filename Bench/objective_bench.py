@@ -19,6 +19,11 @@ from dotenv import load_dotenv
 # 加载.env文件中的环境变量
 load_dotenv()
 
+import logging
+# 设置日志配置，确保支持中文输出
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', encoding='utf-8')
+logger = logging.getLogger()
+
 
 
 # 生成模型基准测试的json文件的主要功能
@@ -42,9 +47,9 @@ if __name__ == "__main__":
         keyword = data[i]['keyword']
         question_type = data[i]['type']
         zero_shot_prompt_text = data[i]['prefix_prompt']
-        print(model_name)
-        print(keyword)
-        print(question_type)
+        logger.info(f"模型名称：{model_name}")
+        logger.info(f"关键词：{keyword}")
+        logger.info(f"问题类型：{question_type}")
 
         export_distribute_json(
             model_api,
