@@ -464,8 +464,8 @@ def export_union_json(directory: str, model_name: str, keyword: str, zero_shot_p
     :param zero_shot_prompt_text: 零样本学习的提示文本
     :param question_type: JSON 文件中的问题类型（例如：single_choice, five_out_of_seven 等）
     """
-    
-    save_directory = os.path.join(directory, f'{model_name}_{keyword}')
+
+    save_directory = os.path.join(os.getenv("model_result_directory"), f'{model_name}_obj','slice', keyword)
     if os.path.exists(save_directory):
         output = {
                         'keyword': keyword, 
@@ -487,7 +487,7 @@ def export_union_json(directory: str, model_name: str, keyword: str, zero_shot_p
                 output['example'] += (data['example'])
         
         # Save the merged data into a single JSON file
-        merge_file = os.path.join(directory, f'{model_name}_{keyword}.json')
+        merge_file = os.path.join(os.getenv("model_result_directory"), f'{model_name}_obj', f'{model_name}_{keyword}.json')
         output['example'] = sorted(output['example'], key=lambda x: x['index'])
         with codecs.open(merge_file, 'w', 'utf-8') as f:
             json.dump(output, f, ensure_ascii=False, indent=4)
@@ -540,9 +540,10 @@ def export_distribute_json(
     # 准备用于并行处理的关键字参数列表
     kwargs_list = []
     batch_size = example_num // parallel_num + 1 # 计算每个进程处理的示例数量
+
+    save_directory = os.path.join(os.getenv("model_result_directory"), f'{model_name}_obj','slice', keyword)
     # 创建保存目录
-    logger.info(f"创建保存目录：{model_name}_{keyword}")
-    save_directory = os.path.join(directory, f'{model_name}_{keyword}')
+    logger.info(f"创建保存目录：{save_directory}")
     os.makedirs(save_directory, exist_ok=True)
 
     # 生成关键字参数列表
