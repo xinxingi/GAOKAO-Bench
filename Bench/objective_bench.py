@@ -47,9 +47,7 @@ if __name__ == "__main__":
         keyword = data[i]['keyword']
         question_type = data[i]['type']
         zero_shot_prompt_text = data[i]['prefix_prompt']
-        logger.info(f"模型名称：{model_name}")
-        logger.info(f"关键词：{keyword}")
-        logger.info(f"问题类型：{question_type}")
+        logger.info(f"模型名称：{model_name},关键词：{keyword},问题类型：{question_type}")
 
         export_distribute_json(
             model_api,
@@ -60,7 +58,7 @@ if __name__ == "__main__":
             question_type,
             parallel_num=1,
         )
-
+        logger.info(f"模型调用完成，开始合并数据...")
 
         export_union_json(
             directory,
@@ -69,3 +67,4 @@ if __name__ == "__main__":
             zero_shot_prompt_text,
             question_type
         )
+        logger.info(f"数据合并完成！")

@@ -513,7 +513,7 @@ def export_distribute_json(
     :param parallel_num: 使用的并行进程数（默认：5）
 
     """
-    logger.info("函数 export_distribute_json 调用开始")
+    logger.debug("函数 export_distribute_json 调用开始")
     file_found = False
 
     # 查找具有指定关键字的 JSON 文件
