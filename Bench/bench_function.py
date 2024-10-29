@@ -118,7 +118,7 @@ def choice_test(**kwargs):
         year = data[i]['year']
         category = data[i]['category']
         score = data[i]['score']
-        standard_answer = data[i]['standard_answer']
+        standard_answer = data[i]['answer'] # 疑似取数据错误,已经修正为answer
         answer_lenth = len(standard_answer)
         analysis = data[i]['analysis']
 
